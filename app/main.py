@@ -42,7 +42,7 @@ def generate_code():
     
     Expected JSON data:
     {
-        "language": "python" | "javascript" | "html",
+        "language": "python" | "cpp" | "javascript" | "css" | "html" | "java",
         "description": "English description of what the code should do",
         "project_id": integer (optional, if user wants to save to a project)
     }
@@ -60,10 +60,10 @@ def generate_code():
         project_id = data.get('project_id')
         
         # Validate input
-        if not language or language not in ['python', 'javascript', 'html']:
+        if not language or language not in ['python', 'cpp', 'javascript', 'css', 'html', 'java']:
             return jsonify({
                 'success': False,
-                'error': 'Invalid language. Please select Python, JavaScript, or HTML/CSS.'
+                'error': 'Invalid language. Please select Python, C++, JavaScript, CSS, HTML, or Java.'
             }), 400
         
         if not description:
@@ -222,7 +222,7 @@ def explain_code_route():
     
     Expected JSON data:
     {
-        "language": "python" | "javascript" | "html",
+        "language": "python" | "cpp" | "javascript" | "css" | "html" | "java",
         "code": "The code to explain",
         "project_id": integer (optional, if user wants to save to a project)
     }
@@ -240,10 +240,10 @@ def explain_code_route():
         project_id = data.get('project_id')
         
         # Validate input
-        if not language or language not in ['python', 'javascript', 'html']:
+        if not language or language not in ['python', 'cpp', 'javascript', 'css', 'html', 'java']:
             return jsonify({
                 'success': False,
-                'error': 'Invalid language. Please select Python, JavaScript, or HTML/CSS.'
+                'error': 'Invalid language. Please select Python, C++, JavaScript, CSS, HTML, or Java.'
             }), 400
         
         if not code:

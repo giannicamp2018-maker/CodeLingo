@@ -8,7 +8,7 @@ A web application that helps students learn programming by generating code from 
 
 ## Features
 
-- **Code Generation**: Enter an English description and get code in Python, JavaScript, or HTML/CSS
+- **Code Generation**: Enter an English description and get code in Python, C++, JavaScript, CSS, HTML, or Java
 - **Code Explanation**: Paste code and get a detailed explanation of how it works
 - **User Authentication**: Secure user registration and login with password hashing
 - **Project Management**: Create projects/folders to organize your code examples
@@ -98,7 +98,7 @@ A web application that helps students learn programming by generating code from 
 ### Generating Code
 
 1. **Select a language**
-   - Click on the Python, JavaScript, or HTML/CSS tab
+   - Click on the Python, C++, JavaScript, CSS, HTML, or Java tab
 
 2. **Choose mode**
    - "Description → Code": Enter what you want the code to do in English

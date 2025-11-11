@@ -52,8 +52,11 @@
                 <select id="language" name="language" class="filter-select">
                     <option value="">All</option>
                     <option value="python" {% if language == 'python' %}selected{% endif %}>Python</option>
+                    <option value="cpp" {% if language == 'cpp' %}selected{% endif %}>C++</option>
                     <option value="javascript" {% if language == 'javascript' %}selected{% endif %}>JavaScript</option>
-                    <option value="html" {% if language == 'html' %}selected{% endif %}>HTML/CSS</option>
+                    <option value="css" {% if language == 'css' %}selected{% endif %}>CSS</option>
+                    <option value="html" {% if language == 'html' %}selected{% endif %}>HTML</option>
+                    <option value="java" {% if language == 'java' %}selected{% endif %}>Java</option>
                 </select>
             </div>
             

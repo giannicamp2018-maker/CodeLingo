@@ -59,7 +59,7 @@ def generate_code_from_description(language, description, user_id=None):
     Generate code from an English description using OpenAI API.
     
     Args:
-        language: Programming language ('python', 'javascript', or 'html')
+        language: Programming language ('python', 'cpp', 'javascript', 'css', 'html', or 'java')
         description: English description of what the code should do
         user_id: Optional user ID for logging purposes
     
@@ -361,7 +361,7 @@ def explain_code(language, code, user_id=None):
     Explain what a piece of code does using OpenAI API.
     
     Args:
-        language: Programming language ('python', 'javascript', or 'html')
+        language: Programming language ('python', 'cpp', 'javascript', 'css', 'html', or 'java')
         code: The code to explain
         user_id: Optional user ID for logging purposes
     
