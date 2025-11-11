@@ -70,8 +70,16 @@ CODE:
 EXPLANATION:
 [your explanation here]"""
 
-        # Get OpenAI client
-        client = get_client()
+        # Get OpenAI client - this will raise ValueError if API key is not configured
+        try:
+            client = get_client()
+        except ValueError as e:
+            # API key not configured
+            return {
+                'code': None,
+                'explanation': str(e),
+                'success': False
+            }
         
         # Call OpenAI API to generate code
         # Using gpt-3.5-turbo model for cost-effectiveness and good quality
@@ -185,8 +193,15 @@ Provide an explanation that:
 
 Make the explanation clear, detailed, and easy to understand."""
 
-        # Get OpenAI client
-        client = get_client()
+        # Get OpenAI client - this will raise ValueError if API key is not configured
+        try:
+            client = get_client()
+        except ValueError as e:
+            # API key not configured
+            return {
+                'explanation': str(e),
+                'success': False
+            }
         
         # Call OpenAI API to explain the code
         response = client.chat.completions.create(

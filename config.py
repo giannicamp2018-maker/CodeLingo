@@ -4,9 +4,17 @@ Contains all application settings including database configuration and secret ke
 """
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-# Load environment variables from .env file
-load_dotenv()
+# Get the directory where this config.py file is located (project root)
+basedir = Path(__file__).resolve().parent
+
+# Load environment variables from .env file in the project root
+# Explicitly specify the path to ensure it's loaded correctly
+env_path = basedir / '.env'
+# Load with explicit encoding to handle BOM if present
+# python-dotenv handles UTF-8 BOM automatically, but we'll be explicit
+load_dotenv(dotenv_path=env_path)
 
 
 class Config:
@@ -20,7 +28,14 @@ class Config:
     
     # Database configuration
     # SQLite database will be stored in the instance folder
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/database.db'
+    # Use absolute path to avoid issues with relative paths
+    instance_path = basedir / 'instance'
+    # Ensure instance directory exists
+    instance_path.mkdir(exist_ok=True)
+    database_path = instance_path / 'database.db'
+    # Convert Windows path to SQLite format (forward slashes)
+    database_uri = 'sqlite:///' + str(database_path).replace('\\', '/')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or database_uri
     
     # Disable SQLAlchemy event system to save resources
     SQLALCHEMY_TRACK_MODIFICATIONS = False
