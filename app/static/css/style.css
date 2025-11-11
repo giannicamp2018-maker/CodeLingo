@@ -538,6 +538,104 @@ pre code.code-block {
 }
 
 /* ========================================
+   Prism.js Syntax Highlighting Colors
+   ======================================== */
+
+/* Override Prism.js colors to match dark theme */
+code[class*="language-"],
+pre[class*="language-"] {
+    color: var(--text-primary);
+}
+
+/* Comments - green */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #6a9955;
+    font-style: italic;
+}
+
+/* Keywords - blue */
+.token.keyword,
+.token.boolean,
+.token.operator,
+.token.important {
+    color: #569cd6;
+}
+
+/* Functions - yellow */
+.token.function,
+.token.function-variable {
+    color: #dcdcaa;
+}
+
+/* Strings - orange */
+.token.string,
+.token.char,
+.token.attr-value {
+    color: #ce9178;
+}
+
+/* Numbers - light green */
+.token.number {
+    color: #b5cea8;
+}
+
+/* Variables - light blue */
+.token.variable,
+.token.property {
+    color: #9cdcfe;
+}
+
+/* Class names - cyan */
+.token.class-name,
+.token.type-definition {
+    color: #4ec9b0;
+}
+
+/* Punctuation - light gray */
+.token.punctuation {
+    color: #d4d4d4;
+}
+
+/* Built-in functions - purple */
+.token.builtin {
+    color: #c586c0;
+}
+
+/* Constants - orange */
+.token.constant {
+    color: #ce9178;
+}
+
+/* Decorators/annotations - yellow */
+.token.decorator,
+.token.annotation {
+    color: #dcdcaa;
+}
+
+/* Regular expressions - red */
+.token.regex {
+    color: #d16969;
+}
+
+/* HTML tags - blue */
+.token.tag {
+    color: #569cd6;
+}
+
+/* HTML attributes - light blue */
+.token.attr-name {
+    color: #92c5f7;
+}
+
+/* CSS selectors - purple */
+.token.selector {
+    color: #c586c0;
+}
+
+/* ========================================
    Error Messages
    ======================================== */
 

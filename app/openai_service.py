@@ -402,7 +402,7 @@ Make the explanation clear, detailed, and easy to understand."""
             }
         
         # Prepare messages for API call
-        system_message = f"You are a helpful programming tutor that explains {language} code in detail."
+        system_message = f"You are a helpful programming tutor that explains {language} code in detail. Keep the explination short and concise, and do not include any other text than the explanation."
         user_message = prompt
         messages = [
             {"role": "system", "content": system_message},

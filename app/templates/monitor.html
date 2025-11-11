@@ -114,7 +114,7 @@
                         {% if log.output_code %}
                         <div class="log-section">
                             <h4>Generated Code:</h4>
-                            <pre class="log-text code-block">{{ log.output_code[:1000] }}{% if log.output_code|length > 1000 %}...{% endif %}</pre>
+                            <pre class="log-text"><code class="code-block language-{{ log.language }}">{{ log.output_code[:1000] }}{% if log.output_code|length > 1000 %}...{% endif %}</code></pre>
                         </div>
                         {% endif %}
                         
@@ -347,5 +347,17 @@
     border-radius: var(--radius-sm);
 }
 </style>
+
+<script>
+    // Highlight all code blocks with Prism.js when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Prism !== 'undefined') {
+            // Find all code blocks and highlight them
+            document.querySelectorAll('code[class*="language-"]').forEach(function(block) {
+                Prism.highlightElement(block);
+            });
+        }
+    });
+</script>
 {% endblock %}
 

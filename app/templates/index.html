@@ -282,7 +282,13 @@
     // Function to display generated code
     function displayCode(code) {
         const codeDisplay = document.getElementById('code-display');
+        // Set the language class for Prism.js
+        codeDisplay.className = `code-block language-${currentLanguage}`;
         codeDisplay.textContent = code;
+        // Highlight the code with Prism.js
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightElement(codeDisplay);
+        }
         document.getElementById('output-section').style.display = 'block';
     }
     

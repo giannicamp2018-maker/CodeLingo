@@ -58,7 +58,7 @@
                         {% if prompt.input_type == 'description' %}
                             <p class="prompt-text">{{ prompt.input_text }}</p>
                         {% else %}
-                            <pre><code class="code-block">{{ prompt.input_text }}</code></pre>
+                            <pre><code class="code-block language-{{ prompt.language }}">{{ prompt.input_text }}</code></pre>
                         {% endif %}
                     </div>
                     
@@ -66,7 +66,7 @@
                     {% if prompt.output_code %}
                     <div class="prompt-section">
                         <h4>Generated Code:</h4>
-                        <pre><code class="code-block">{{ prompt.output_code }}</code></pre>
+                        <pre><code class="code-block language-{{ prompt.language }}">{{ prompt.output_code }}</code></pre>
                         <button class="copy-button" onclick="copyToClipboard('code-{{ prompt.id }}')">Copy Code</button>
                         <pre id="code-{{ prompt.id }}" style="display: none;">{{ prompt.output_code }}</pre>
                     </div>
@@ -130,6 +130,16 @@
         
         alert('Code copied to clipboard!');
     }
+    
+    // Highlight all code blocks with Prism.js when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Prism !== 'undefined') {
+            // Find all code blocks and highlight them
+            document.querySelectorAll('code[class*="language-"]').forEach(function(block) {
+                Prism.highlightElement(block);
+            });
+        }
+    });
 </script>
 {% endblock %}
 

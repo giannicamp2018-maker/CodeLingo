@@ -10,6 +10,9 @@
     
     <!-- Link to CSS stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 <body>
     <!-- Navigation bar -->
@@ -68,6 +71,10 @@
     
     <!-- JavaScript file -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Prism.js JavaScript for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     
     <!-- Block for additional JavaScript in child templates -->
     {% block scripts %}{% endblock %}
