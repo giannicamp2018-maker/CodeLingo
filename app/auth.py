@@ -134,20 +134,31 @@ def login():
         # Check if user exists
         if not user:
             # User doesn't exist - don't reveal this for security
+            print(f"Login attempt: User '{username}' not found")
             flash('Invalid username or password.', 'error')
             return render_template('login.html')
         
+        # Debug: Log user found
+        print(f"Login attempt: User '{username}' (ID: {user.id}) found")
+        
         # Check if user has a valid password hash
         if not user.password_hash:
+            print(f"Login error: User '{username}' has no password hash")
             flash('Account error: Password not set. Please contact support or reset your password.', 'error')
             return render_template('login.html')
+        
+        # Debug: Log password hash status
+        print(f"Login attempt: User '{username}' has password hash: {bool(user.password_hash)}")
         
         # Check if password is correct
         try:
             password_valid = user.check_password(password)
+            print(f"Login attempt: Password validation result for user '{username}': {password_valid}")
         except Exception as e:
             # Log the error for debugging (in production, use proper logging)
             print(f"Password check error for user {username}: {str(e)}")
+            import traceback
+            traceback.print_exc()
             flash('An error occurred during login. Please try again.', 'error')
             return render_template('login.html')
         
@@ -157,6 +168,9 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             
+            # Debug: Log successful login
+            print(f"Login successful: User '{username}' (ID: {user.id}) logged in")
+            
             # Flash success message
             flash(f'Welcome back, {user.username}!', 'success')
             
@@ -164,6 +178,7 @@ def login():
             return redirect(url_for('main.index'))
         else:
             # Invalid password
+            print(f"Login failed: Invalid password for user '{username}'")
             flash('Invalid username or password.', 'error')
             return render_template('login.html')
     
