@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Programming Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container">
+        <h1 class="auth-title">Register</h1>
+        <p class="auth-subtitle">Create an account to save and organize your code examples</p>
+        
+        <!-- Registration form -->
+        <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+            <!-- Username field -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus>
+                <small class="form-help">Choose a unique username</small>
+            </div>
+            
+            <!-- Email field -->
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-input" required>
+                <small class="form-help">We'll never share your email</small>
+            </div>
+            
+            <!-- Password field -->
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+                <small class="form-help">Must be at least 6 characters long</small>
+            </div>
+            
+            <!-- Confirm password field -->
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+            </div>
+            
+            <!-- Submit button -->
+            <button type="submit" class="submit-button">Register</button>
+        </form>
+        
+        <!-- Link to login page -->
+        <p class="auth-link">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

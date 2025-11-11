@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Programming Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container">
+        <h1 class="auth-title">Login</h1>
+        <p class="auth-subtitle">Sign in to your account to save your code examples</p>
+        
+        <!-- Login form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+            <!-- Username field -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus>
+            </div>
+            
+            <!-- Password field -->
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+            
+            <!-- Submit button -->
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+        
+        <!-- Link to registration page -->
+        <p class="auth-link">
+            Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

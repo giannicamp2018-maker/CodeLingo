@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Programming Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page header -->
+    <h1 class="page-title">Learn Programming with AI</h1>
+    <p class="page-subtitle">Generate code from descriptions or get explanations for existing code</p>
+    
+    <!-- Project selector (only shown if user is logged in) -->
+    {% if user_logged_in and projects %}
+    <div class="project-selector">
+        <label for="project-select">Save to Project (Optional):</label>
+        <select id="project-select" class="project-select">
+            <option value="">-- Select a project --</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% elif user_logged_in %}
+    <div class="project-selector">
+        <p class="info-text">Create a project to save your code examples. <a href="{{ url_for('projects.list_projects') }}">Go to Projects</a></p>
+    </div>
+    {% else %}
+    <div class="project-selector">
+        <p class="info-text"><a href="{{ url_for('auth.register') }}">Register</a> or <a href="{{ url_for('auth.login') }}">Login</a> to save your code examples to projects.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Language tabs -->
+    <div class="language-tabs">
+        <button class="tab-button active" data-language="python">Python</button>
+        <button class="tab-button" data-language="javascript">JavaScript</button>
+        <button class="tab-button" data-language="html">HTML/CSS</button>
+    </div>
+    
+    <!-- Mode selector -->
+    <div class="mode-selector">
+        <button class="mode-button active" data-mode="generate">Description → Code</button>
+        <button class="mode-button" data-mode="explain">Code → Explanation</button>
+    </div>
+    
+    <!-- Input area -->
+    <div class="input-section">
+        <!-- Description input (for generate mode) -->
+        <div id="description-input" class="input-group">
+            <label for="description-text">Enter what you want the code to do (in English):</label>
+            <textarea id="description-text" class="input-textarea" rows="6" placeholder="Example: Create a function that calculates the factorial of a number"></textarea>
+        </div>
+        
+        <!-- Code input (for explain mode) -->
+        <div id="code-input" class="input-group" style="display: none;">
+            <label for="code-text">Enter the code you want explained:</label>
+            <textarea id="code-text" class="input-textarea" rows="6" placeholder="Paste your code here..."></textarea>
+        </div>
+        
+        <!-- Submit button -->
+        <button id="submit-button" class="submit-button">Generate Code</button>
+    </div>
+    
+    <!-- Loading indicator (hidden by default) -->
+    <div id="loading" class="loading" style="display: none;">
+        <p>Processing your request...</p>
+    </div>
+    
+    <!-- Output area -->
+    <div id="output-section" class="output-section" style="display: none;">
+        <!-- Code output (for generate mode) -->
+        <div id="code-output" class="output-group">
+            <h3>Generated Code:</h3>
+            <pre><code id="code-display" class="code-block"></code></pre>
+            <button class="copy-button" onclick="copyToClipboard('code-display')">Copy Code</button>
+        </div>
+        
+        <!-- Explanation output -->
+        <div id="explanation-output" class="output-group">
+            <h3>Explanation:</h3>
+            <div id="explanation-display" class="explanation-text"></div>
+        </div>
+    </div>
+    
+    <!-- Error message area -->
+    <div id="error-message" class="error-message" style="display: none;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Store current language and mode
+    let currentLanguage = 'python';
+    let currentMode = 'generate';
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up language tab switching
+        setupLanguageTabs();
+        
+        // Set up mode switching
+        setupModeSwitching();
+        
+        // Set up form submission
+        setupFormSubmission();
+    });
+    
+    // Function to set up language tab switching
+    function setupLanguageTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Update current language
+                currentLanguage = this.getAttribute('data-language');
+            });
+        });
+    }
+    
+    // Function to set up mode switching
+    function setupModeSwitching() {
+        const modeButtons = document.querySelectorAll('.mode-button');
+        modeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all mode buttons
+                modeButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Update current mode
+                currentMode = this.getAttribute('data-mode');
+                
+                // Show/hide appropriate input fields
+                if (currentMode === 'generate') {
+                    document.getElementById('description-input').style.display = 'block';
+                    document.getElementById('code-input').style.display = 'none';
+                    document.getElementById('submit-button').textContent = 'Generate Code';
+                    document.getElementById('code-output').style.display = 'block';
+                } else {
+                    document.getElementById('description-input').style.display = 'none';
+                    document.getElementById('code-input').style.display = 'block';
+                    document.getElementById('submit-button').textContent = 'Explain Code';
+                    document.getElementById('code-output').style.display = 'none';
+                }
+                
+                // Clear output
+                clearOutput();
+            });
+        });
+    }
+    
+    // Function to set up form submission
+    function setupFormSubmission() {
+        const submitButton = document.getElementById('submit-button');
+        submitButton.addEventListener('click', function() {
+            // Get selected project ID
+            const projectSelect = document.getElementById('project-select');
+            const projectId = projectSelect ? projectSelect.value : null;
+            
+            if (currentMode === 'generate') {
+                // Generate code from description
+                generateCode(projectId);
+            } else {
+                // Explain code
+                explainCode(projectId);
+            }
+        });
+    }
+    
+    // Function to generate code from description
+    function generateCode(projectId) {
+        const description = document.getElementById('description-text').value.trim();
+        
+        // Validate input
+        if (!description) {
+            showError('Please enter a description of what you want the code to do.');
+            return;
+        }
+        
+        // Show loading indicator
+        showLoading(true);
+        hideError();
+        hideOutput();
+        
+        // Prepare request data
+        const data = {
+            language: currentLanguage,
+            description: description
+        };
+        
+        // Add project ID if selected
+        if (projectId) {
+            data.project_id = parseInt(projectId);
+        }
+        
+        // Make AJAX request to generate code
+        fetch('/generate-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            
+            if (data.success) {
+                // Display code and explanation
+                displayCode(data.code);
+                displayExplanation(data.explanation);
+            } else {
+                // Show error message
+                showError(data.error || 'Failed to generate code. Please try again.');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showError('An error occurred. Please try again.');
+            console.error('Error:', error);
+        });
+    }
+    
+    // Function to explain code
+    function explainCode(projectId) {
+        const code = document.getElementById('code-text').value.trim();
+        
+        // Validate input
+        if (!code) {
+            showError('Please enter code to explain.');
+            return;
+        }
+        
+        // Show loading indicator
+        showLoading(true);
+        hideError();
+        hideOutput();
+        
+        // Prepare request data
+        const data = {
+            language: currentLanguage,
+            code: code
+        };
+        
+        // Add project ID if selected
+        if (projectId) {
+            data.project_id = parseInt(projectId);
+        }
+        
+        // Make AJAX request to explain code
+        fetch('/explain-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            
+            if (data.success) {
+                // Display explanation only
+                displayExplanation(data.explanation);
+            } else {
+                // Show error message
+                showError(data.error || 'Failed to explain code. Please try again.');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showError('An error occurred. Please try again.');
+            console.error('Error:', error);
+        });
+    }
+    
+    // Function to display generated code
+    function displayCode(code) {
+        const codeDisplay = document.getElementById('code-display');
+        codeDisplay.textContent = code;
+        document.getElementById('output-section').style.display = 'block';
+    }
+    
+    // Function to display explanation
+    function displayExplanation(explanation) {
+        const explanationDisplay = document.getElementById('explanation-display');
+        // Convert newlines to HTML line breaks
+        explanationDisplay.innerHTML = explanation.replace(/\n/g, '<br>');
+        document.getElementById('output-section').style.display = 'block';
+    }
+    
+    // Function to clear output
+    function clearOutput() {
+        document.getElementById('output-section').style.display = 'none';
+        document.getElementById('code-display').textContent = '';
+        document.getElementById('explanation-display').textContent = '';
+    }
+    
+    // Function to show/hide loading indicator
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+    
+    function hideLoading() {
+        showLoading(false);
+    }
+    
+    // Function to show/hide error message
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+    
+    function hideError() {
+        document.getElementById('error-message').style.display = 'none';
+    }
+    
+    function hideOutput() {
+        document.getElementById('output-section').style.display = 'none';
+    }
+    
+    // Function to copy code to clipboard
+    function copyToClipboard(elementId) {
+        const codeElement = document.getElementById(elementId);
+        const text = codeElement.textContent;
+        
+        // Create temporary textarea to copy text
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // Show feedback
+        alert('Code copied to clipboard!');
+    }
+</script>
+{% endblock %}
+

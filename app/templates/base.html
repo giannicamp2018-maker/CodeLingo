@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for character encoding and viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Page title - will be overridden by child templates -->
+    <title>{% block title %}Programming Learning Platform{% endblock %}</title>
+    
+    <!-- Link to CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo/Brand name -->
+            <div class="nav-brand">
+                <a href="{{ url_for('main.index') }}">CodeLearner</a>
+            </div>
+            
+            <!-- Navigation links -->
+            <div class="nav-links">
+                <!-- Home link -->
+                <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
+                
+                <!-- Show projects link and user info if logged in -->
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('projects.list_projects') }}" class="nav-link">My Projects</a>
+                    <span class="nav-user">Welcome, {{ session.get('username', 'User') }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
+                {% else %}
+                    <!-- Show login/register links if not logged in -->
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="nav-link">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash messages container -->
+    <!-- Display success, error, and warning messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                        <button class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <!-- Main content area -->
+    <!-- Child templates will override this block -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CodeLearner - Learn Programming with AI Assistance</p>
+    </footer>
+    
+    <!-- JavaScript file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Block for additional JavaScript in child templates -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

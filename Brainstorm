@@ -1,0 +1,5 @@
+A website that can be used to help students learn how to program, by offering a different tab for multiple languages
+in which the user can enter what they want to happen in english, and then the website returns back to them the code
+requested, as well as an explination on the parts of the code. This will be achieved by using OPENAI API key prompting,
+using python for the backend and CSS/JS for frontend. Make sure to give lots of comments as well within the code
+to help understand what is going on.

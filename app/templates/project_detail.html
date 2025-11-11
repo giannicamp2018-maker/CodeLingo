@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} - Programming Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Project header -->
+    <div class="project-header">
+        <h1 class="page-title">{{ project.name }}</h1>
+        <p class="project-meta">
+            Created: {{ project.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </p>
+        <div class="project-header-actions">
+            <a href="{{ url_for('projects.list_projects') }}" class="action-button back-button">Back to Projects</a>
+            <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this project? All saved prompts will be deleted.');">
+                <button type="submit" class="action-button delete-button">Delete Project</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Saved prompts list -->
+    <div class="saved-prompts-list">
+        <h2>Saved Code Examples</h2>
+        
+        {% if saved_prompts %}
+            <!-- Filter options -->
+            <div class="filter-section">
+                <label for="language-filter">Filter by Language:</label>
+                <select id="language-filter" class="filter-select">
+                    <option value="">All Languages</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="html">HTML/CSS</option>
+                </select>
+                
+                <label for="type-filter">Filter by Type:</label>
+                <select id="type-filter" class="filter-select">
+                    <option value="">All Types</option>
+                    <option value="description">Description → Code</option>
+                    <option value="code">Code → Explanation</option>
+                </select>
+            </div>
+            
+            <!-- Prompts grid -->
+            <div class="prompts-grid">
+                {% for prompt in saved_prompts %}
+                <div class="prompt-card" data-language="{{ prompt.language }}" data-type="{{ prompt.input_type }}">
+                    <!-- Prompt header -->
+                    <div class="prompt-header">
+                        <span class="language-badge language-{{ prompt.language }}">{{ prompt.language|title }}</span>
+                        <span class="type-badge type-{{ prompt.input_type }}">{{ prompt.input_type|title }}</span>
+                        <span class="prompt-date">{{ prompt.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    
+                    <!-- Input section -->
+                    <div class="prompt-section">
+                        <h4>Input:</h4>
+                        {% if prompt.input_type == 'description' %}
+                            <p class="prompt-text">{{ prompt.input_text }}</p>
+                        {% else %}
+                            <pre><code class="code-block">{{ prompt.input_text }}</code></pre>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Output code (if exists) -->
+                    {% if prompt.output_code %}
+                    <div class="prompt-section">
+                        <h4>Generated Code:</h4>
+                        <pre><code class="code-block">{{ prompt.output_code }}</code></pre>
+                        <button class="copy-button" onclick="copyToClipboard('code-{{ prompt.id }}')">Copy Code</button>
+                        <pre id="code-{{ prompt.id }}" style="display: none;">{{ prompt.output_code }}</pre>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Explanation -->
+                    <div class="prompt-section">
+                        <h4>Explanation:</h4>
+                        <div class="explanation-text">{{ prompt.explanation|replace('\n', '<br>')|safe }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-message">No saved prompts in this project yet. Start generating code to save examples here!</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const languageFilter = document.getElementById('language-filter');
+        const typeFilter = document.getElementById('type-filter');
+        
+        function filterPrompts() {
+            const selectedLanguage = languageFilter.value;
+            const selectedType = typeFilter.value;
+            
+            const promptCards = document.querySelectorAll('.prompt-card');
+            promptCards.forEach(card => {
+                const cardLanguage = card.getAttribute('data-language');
+                const cardType = card.getAttribute('data-type');
+                
+                const languageMatch = !selectedLanguage || cardLanguage === selectedLanguage;
+                const typeMatch = !selectedType || cardType === selectedType;
+                
+                if (languageMatch && typeMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        languageFilter.addEventListener('change', filterPrompts);
+        typeFilter.addEventListener('change', filterPrompts);
+    });
+    
+    // Copy to clipboard function
+    function copyToClipboard(elementId) {
+        const codeElement = document.getElementById(elementId);
+        const text = codeElement.textContent;
+        
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        alert('Code copied to clipboard!');
+    }
+</script>
+{% endblock %}
+
