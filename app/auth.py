@@ -131,8 +131,27 @@ def login():
         # Find user by username
         user = User.query.filter_by(username=username).first()
         
-        # Check if user exists and password is correct
-        if user and user.check_password(password):
+        # Check if user exists
+        if not user:
+            # User doesn't exist - don't reveal this for security
+            flash('Invalid username or password.', 'error')
+            return render_template('login.html')
+        
+        # Check if user has a valid password hash
+        if not user.password_hash:
+            flash('Account error: Password not set. Please contact support or reset your password.', 'error')
+            return render_template('login.html')
+        
+        # Check if password is correct
+        try:
+            password_valid = user.check_password(password)
+        except Exception as e:
+            # Log the error for debugging (in production, use proper logging)
+            print(f"Password check error for user {username}: {str(e)}")
+            flash('An error occurred during login. Please try again.', 'error')
+            return render_template('login.html')
+        
+        if password_valid:
             # Create session for logged-in user
             # Store user ID in session to identify logged-in user
             session['user_id'] = user.id
@@ -144,7 +163,7 @@ def login():
             # Redirect to home page
             return redirect(url_for('main.index'))
         else:
-            # Invalid credentials
+            # Invalid password
             flash('Invalid username or password.', 'error')
             return render_template('login.html')
     

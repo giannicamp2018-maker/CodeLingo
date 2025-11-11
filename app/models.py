@@ -61,8 +61,17 @@ class User(db.Model):
         Returns:
             True if password matches, False otherwise
         """
+        # Check if password_hash exists
+        if not self.password_hash:
+            return False
+        
         # Compare provided password with stored hash
-        return check_password_hash(self.password_hash, password)
+        try:
+            return check_password_hash(self.password_hash, password)
+        except (ValueError, TypeError) as e:
+            # Handle cases where password_hash might be corrupted or invalid
+            print(f"Error checking password hash: {str(e)}")
+            return False
     
     def __repr__(self):
         """String representation of the User object for debugging."""
