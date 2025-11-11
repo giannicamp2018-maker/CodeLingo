@@ -224,28 +224,158 @@ body {
     background-color: var(--bg-secondary);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    animation: slideDownFadeIn 0.4s ease-out;
+    transition: var(--transition);
+}
+
+@keyframes slideDownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .project-selector label {
     display: block;
     margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
+    transition: var(--transition);
 }
 
-.project-select {
+/* Custom Dropdown Styles - Adapted from provided animation */
+.project-dropdown-wrapper {
+    display: inline-block;
     width: 100%;
     max-width: 400px;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 1rem;
+    position: relative;
+    min-height: 40px;
 }
 
-.project-select:focus {
-    outline: none;
-    border-color: var(--accent-primary);
+.project-dropdown-parent {
+    height: 100%;
+    width: 100%;
+    display: block;
+    cursor: pointer;
+    line-height: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-weight: normal;
+    z-index: 2;
+    position: relative;
+    transition: border-radius 0.1s linear, background 0.1s linear, z-index 0s linear;
+    transition-delay: 0.8s;
+    text-align: left;
+    padding: 0 var(--spacing-md);
+    box-sizing: border-box;
+}
+
+.project-dropdown-parent:hover,
+.project-dropdown-content:hover ~ .project-dropdown-parent {
+    background: var(--bg-secondary);
+    transition-delay: 0s, 0s, 0s;
+}
+
+.project-dropdown-content:hover ~ .project-dropdown-parent {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    z-index: 0;
+}
+
+.project-dropdown-content {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    display: block;
+    z-index: 1;
+    height: 0;
+    width: 100%;
+    transition: height 0.3s ease;
+    transition-delay: 0.1s;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg-secondary);
+}
+
+.project-dropdown-content.active {
+    height: var(--dropdown-height, auto);
+    max-height: 300px;
+    z-index: 3;
+    transition-delay: 0s;
+    overflow-y: auto;
+    pointer-events: auto;
+}
+
+.project-dropdown-content.active:hover {
+    height: var(--dropdown-height, auto);
+    max-height: 300px;
+    z-index: 3;
+    transition-delay: 0s;
+    overflow-y: auto;
+    pointer-events: auto;
+}
+
+.project-dropdown-content ul {
+    background: var(--bg-secondary);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    min-height: 100%;
+    border-bottom-left-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+    list-style: none;
+    position: relative;
+    z-index: 1;
+}
+
+.project-dropdown-content ul a {
+    text-decoration: none;
+}
+
+.project-dropdown-content .project-option {
+    list-style: none;
+    text-align: left;
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 40px;
+    height: 40px;
+    padding-left: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.project-dropdown-content .project-option:hover {
+    background: var(--bg-tertiary);
+    color: var(--accent-primary);
+}
+
+.project-dropdown-content .project-option:first-of-type {
+    border-top: none;
+}
+
+.project-dropdown-content .project-option:last-of-type {
+    border-bottom-left-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.project-dropdown-parent.active {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    z-index: 0;
+    background: var(--bg-secondary);
+    transition-delay: 0s, 0s, 0s;
 }
 
 .info-text {

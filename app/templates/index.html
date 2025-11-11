@@ -12,12 +12,21 @@
     {% if user_logged_in and projects %}
     <div class="project-selector">
         <label for="project-select">Save to Project (Optional):</label>
-        <select id="project-select" class="project-select">
-            <option value="">-- Select a project --</option>
-            {% for project in projects %}
-            <option value="{{ project.id }}">{{ project.name }}</option>
-            {% endfor %}
-        </select>
+        <div class="project-dropdown-wrapper">
+            <div class="project-dropdown-parent" id="project-dropdown-parent">
+                <span id="project-dropdown-text">-- Select a project --</span>
+            </div>
+            <div class="project-dropdown-content" id="project-dropdown-content">
+                <ul>
+                    <li data-value="" class="project-option">-- Select a project --</li>
+                    {% for project in projects %}
+                    <li data-value="{{ project.id }}" class="project-option">{{ project.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- Hidden input to store selected value -->
+            <input type="hidden" id="project-select" name="project-select" value="">
+        </div>
     </div>
     {% elif user_logged_in %}
     <div class="project-selector">
@@ -102,6 +111,9 @@
         
         // Set up form submission
         setupFormSubmission();
+        
+        // Set up custom project dropdown
+        setupProjectDropdown();
     });
     
     // Function to set up language tab switching
@@ -349,6 +361,70 @@
         
         // Show feedback
         alert('Code copied to clipboard!');
+    }
+    
+    // Function to set up custom project dropdown
+    function setupProjectDropdown() {
+        const dropdownParent = document.getElementById('project-dropdown-parent');
+        const dropdownContent = document.getElementById('project-dropdown-content');
+        const dropdownText = document.getElementById('project-dropdown-text');
+        const hiddenInput = document.getElementById('project-select');
+        const wrapper = document.querySelector('.project-dropdown-wrapper');
+        
+        if (!dropdownParent || !dropdownContent || !wrapper) return;
+        
+        const options = dropdownContent.querySelectorAll('.project-option');
+        
+        // Calculate the height needed for the dropdown (40px per option)
+        const optionHeight = 40;
+        const totalHeight = options.length * optionHeight;
+        dropdownContent.style.setProperty('--dropdown-height', totalHeight + 'px');
+        
+        // Handle option clicks
+        options.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const value = this.getAttribute('data-value');
+                const text = this.textContent;
+                
+                // Update hidden input
+                if (hiddenInput) {
+                    hiddenInput.value = value;
+                }
+                
+                // Update displayed text
+                if (dropdownText) {
+                    dropdownText.textContent = text;
+                }
+                
+                // Close dropdown immediately
+                dropdownContent.classList.remove('active');
+                dropdownParent.classList.remove('active');
+            });
+        });
+        
+        // Handle parent click to toggle dropdown
+        dropdownParent.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isActive = dropdownContent.classList.contains('active');
+            
+            if (isActive) {
+                dropdownContent.classList.remove('active');
+                dropdownParent.classList.remove('active');
+            } else {
+                dropdownContent.classList.add('active');
+                dropdownParent.classList.add('active');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdownContent.classList.remove('active');
+                dropdownParent.classList.remove('active');
+            }
+        });
     }
 </script>
 {% endblock %}
