@@ -61,17 +61,32 @@ def create_project():
         db.session.add(project)
         db.session.commit()
         
-        # Flash success message
-        flash(f'Project "{project_name}" created successfully!', 'success')
+        # Get the project ID after commit
+        project_id = project.id
+        
+        # Verify the project was actually saved by querying it back
+        # This helps catch any database transaction issues
+        verified_project = Project.query.filter_by(id=project_id, user_id=user_id).first()
+        
+        if verified_project:
+            # Flash success message
+            flash(f'Project "{project_name}" created successfully!', 'success')
+            print(f"✓ Project '{project_name}' (ID: {project_id}) created and verified for user {user_id}")
+        else:
+            # This should never happen, but if it does, we need to know
+            flash(f'Project "{project_name}" may not have been saved properly. Please refresh the page.', 'error')
+            print(f"⚠ WARNING: Project '{project_name}' (ID: {project_id}) was created but could not be verified for user {user_id}")
     
     except Exception as e:
         # Handle errors
         db.session.rollback()
         flash('An error occurred while creating the project. Please try again.', 'error')
-        print(f"Error creating project: {str(e)}")
+        print(f"✗ Error creating project: {str(e)}")
+        import traceback
+        traceback.print_exc()
     
-    # Redirect back to projects list
-    return redirect(url_for('projects.list_projects'))
+    # Redirect to home page so user can immediately use the new project
+    return redirect(url_for('main.index'))
 
 
 @bp.route('/<int:project_id>')

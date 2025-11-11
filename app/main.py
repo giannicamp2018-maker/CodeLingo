@@ -24,14 +24,65 @@ def index():
     projects = []
     
     if user_id:
-        # If user is logged in, get their projects
-        # This allows them to select a project to save prompts to
-        user = User.query.get(user_id)
-        if user:
+        try:
+            # If user is logged in, get their projects
+            # This allows them to select a project to save prompts to
+            # Use filter_by directly on Project - more efficient than checking user first
             projects = Project.query.filter_by(user_id=user_id).order_by(Project.created_at.desc()).all()
+            
+            # Debug: Log if projects are found
+            if projects:
+                print(f"Found {len(projects)} project(s) for user {user_id}: {[p.name for p in projects]}")
+            else:
+                # Double-check by querying all projects for this user (for debugging)
+                all_user_projects = Project.query.filter_by(user_id=user_id).all()
+                print(f"No projects found for user {user_id} (queried {len(all_user_projects)} projects)")
+                
+        except Exception as e:
+            # Log error but don't crash - just show empty projects list
+            print(f"Error fetching projects for user {user_id}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            projects = []
     
     # Render the main page with projects (if user is logged in)
     return render_template('index.html', projects=projects, user_logged_in=bool(user_id))
+
+
+@bp.route('/api/projects', methods=['GET'])
+def get_projects_api():
+    """
+    API endpoint to fetch user's projects.
+    Returns JSON list of projects for the logged-in user.
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({
+            'success': False,
+            'error': 'User not logged in'
+        }), 401
+    
+    try:
+        projects = Project.query.filter_by(user_id=user_id).order_by(Project.created_at.desc()).all()
+        
+        projects_data = [{
+            'id': project.id,
+            'name': project.name,
+            'created_at': project.created_at.isoformat()
+        } for project in projects]
+        
+        return jsonify({
+            'success': True,
+            'projects': projects_data
+        })
+    
+    except Exception as e:
+        print(f"Error fetching projects via API for user {user_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to fetch projects'
+        }), 500
 
 
 @bp.route('/generate-code', methods=['POST'])
