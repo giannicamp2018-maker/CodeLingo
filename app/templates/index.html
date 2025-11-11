@@ -313,8 +313,11 @@
     // Function to show/hide error message
     function showError(message) {
         const errorDiv = document.getElementById('error-message');
-        errorDiv.textContent = message;
+        // Convert newlines to HTML line breaks and preserve formatting
+        errorDiv.innerHTML = message.replace(/\n/g, '<br>');
         errorDiv.style.display = 'block';
+        // Scroll to error message
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     
     function hideError() {

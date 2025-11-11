@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Prompt Monitor - Programming Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Prompt Monitor</h1>
+    <p class="page-subtitle">View all prompts sent to OpenAI and their responses</p>
+    
+    {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    <!-- Statistics -->
+    <div class="monitor-stats">
+        <div class="stat-card">
+            <h3>Total Logs</h3>
+            <p class="stat-number">{{ total_logs }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Successful</h3>
+            <p class="stat-number">{{ successful_logs }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Success Rate</h3>
+            <p class="stat-number">
+                {% if total_logs > 0 %}
+                    {{ "%.1f"|format((successful_logs / total_logs * 100)) }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="GET" action="{{ url_for('main.monitor') }}" class="filter-form">
+            <div class="filter-group">
+                <label for="operation_type">Operation Type:</label>
+                <select id="operation_type" name="operation_type" class="filter-select">
+                    <option value="">All</option>
+                    <option value="generate" {% if operation_type == 'generate' %}selected{% endif %}>Generate</option>
+                    <option value="explain" {% if operation_type == 'explain' %}selected{% endif %}>Explain</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="language">Language:</label>
+                <select id="language" name="language" class="filter-select">
+                    <option value="">All</option>
+                    <option value="python" {% if language == 'python' %}selected{% endif %}>Python</option>
+                    <option value="javascript" {% if language == 'javascript' %}selected{% endif %}>JavaScript</option>
+                    <option value="html" {% if language == 'html' %}selected{% endif %}>HTML/CSS</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="success_only">
+                    <input type="checkbox" id="success_only" name="success_only" value="true" {% if success_only %}checked{% endif %}>
+                    Success Only
+                </label>
+            </div>
+            
+            <div class="filter-group">
+                <label for="limit">Limit:</label>
+                <select id="limit" name="limit" class="filter-select">
+                    <option value="25" {% if limit == 25 %}selected{% endif %}>25</option>
+                    <option value="50" {% if limit == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if limit == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if limit == 200 %}selected{% endif %}>200</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-button">Apply Filters</button>
+        </form>
+    </div>
+    
+    <!-- Logs List -->
+    <div class="logs-list">
+        {% if logs %}
+            {% for log in logs %}
+            <div class="log-card {% if not log.success %}log-error{% endif %}">
+                <div class="log-header">
+                    <div class="log-meta">
+                        <span class="log-id">#{{ log.id }}</span>
+                        <span class="log-type badge-{{ log.operation_type }}">{{ log.operation_type|title }}</span>
+                        <span class="log-language language-{{ log.language }}">{{ log.language|title }}</span>
+                        {% if log.success %}
+                            <span class="log-status success">✓ Success</span>
+                        {% else %}
+                            <span class="log-status error">✗ Failed</span>
+                        {% endif %}
+                    </div>
+                    <div class="log-date">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                </div>
+                
+                <div class="log-content">
+                    <div class="log-section">
+                        <h4>Input:</h4>
+                        <pre class="log-text">{{ log.input_text[:500] }}{% if log.input_text|length > 500 %}...{% endif %}</pre>
+                    </div>
+                    
+                    {% if log.full_prompt %}
+                    <div class="log-section">
+                        <h4>Full Prompt Sent to OpenAI:</h4>
+                        <pre class="log-text log-prompt">{{ log.full_prompt[:1000] }}{% if log.full_prompt|length > 1000 %}...{% endif %}</pre>
+                    </div>
+                    {% endif %}
+                    
+                    {% if log.success %}
+                        {% if log.output_code %}
+                        <div class="log-section">
+                            <h4>Generated Code:</h4>
+                            <pre class="log-text code-block">{{ log.output_code[:1000] }}{% if log.output_code|length > 1000 %}...{% endif %}</pre>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.explanation %}
+                        <div class="log-section">
+                            <h4>Explanation:</h4>
+                            <div class="log-text explanation-text">{{ log.explanation[:1000] }}{% if log.explanation|length > 1000 %}...{% endif %}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.response_text %}
+                        <div class="log-section">
+                            <h4>Full Response from OpenAI:</h4>
+                            <pre class="log-text log-response">{{ log.response_text[:1000] }}{% if log.response_text|length > 1000 %}...{% endif %}</pre>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        {% if log.error_message %}
+                        <div class="log-section">
+                            <h4>Error:</h4>
+                            <div class="log-text error-message">{{ log.error_message }}</div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="log-footer">
+                        {% if log.tokens_used %}
+                            <span class="log-tokens">Tokens: {{ log.tokens_used }}</span>
+                        {% endif %}
+                        {% if log.model_used %}
+                            <span class="log-model">Model: {{ log.model_used }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-message">
+                <p>No logs found. Start generating code or explaining code to see prompts here.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.monitor-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    padding: var(--spacing-lg);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.stat-card h3 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-primary);
+    margin: 0;
+}
+
+.filter-form {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.filter-group label {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.logs-list {
+    margin-top: var(--spacing-xl);
+}
+
+.log-card {
+    padding: var(--spacing-lg);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+    transition: var(--transition);
+}
+
+.log-card:hover {
+    border-color: var(--accent-primary);
+}
+
+.log-card.log-error {
+    border-color: var(--error);
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.log-meta {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.log-id {
+    font-weight: bold;
+    color: var(--text-muted);
+}
+
+.badge-generate {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: rgba(35, 134, 54, 0.3);
+    color: var(--accent-primary);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.badge-explain {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: rgba(88, 166, 255, 0.3);
+    color: var(--info);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.log-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.log-status.success {
+    background-color: rgba(35, 134, 54, 0.3);
+    color: var(--accent-primary);
+}
+
+.log-status.error {
+    background-color: rgba(248, 81, 73, 0.3);
+    color: var(--error);
+}
+
+.log-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.log-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.log-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.log-section h4 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--accent-primary);
+    font-size: 1rem;
+}
+
+.log-text {
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+.log-prompt {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.log-response {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.log-footer {
+    display: flex;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.log-tokens,
+.log-model {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+}
+</style>
+{% endblock %}
+

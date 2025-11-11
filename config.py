@@ -14,7 +14,8 @@ basedir = Path(__file__).resolve().parent
 env_path = basedir / '.env'
 # Load with explicit encoding to handle BOM if present
 # python-dotenv handles UTF-8 BOM automatically, but we'll be explicit
-load_dotenv(dotenv_path=env_path)
+# Use override=True to ensure .env file values override system environment variables
+load_dotenv(dotenv_path=env_path, override=True)
 
 
 class Config:

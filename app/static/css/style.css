@@ -480,6 +480,39 @@ body {
     color: var(--accent-primary);
 }
 
+/* Code block styling - ensure pre has the container styling */
+pre {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    overflow-x: auto;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Code element inside pre should have NO background, border, or padding to prevent overlapping blocks */
+pre code,
+pre code.code-block {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+/* Standalone code-block class (for backward compatibility if used elsewhere) */
 .code-block {
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -492,6 +525,7 @@ body {
     color: var(--text-primary);
     white-space: pre-wrap;
     word-wrap: break-word;
+    display: block;
 }
 
 .explanation-text {
@@ -514,6 +548,18 @@ body {
     border-radius: var(--radius-md);
     color: var(--error);
     margin-top: var(--spacing-md);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.error-message a {
+    color: var(--accent-light);
+    text-decoration: underline;
+}
+
+.error-message a:hover {
+    color: var(--accent-hover);
 }
 
 /* ========================================

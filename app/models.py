@@ -155,3 +155,75 @@ class SavedPrompt(db.Model):
         """String representation of the SavedPrompt object for debugging."""
         return f'<SavedPrompt {self.id} - {self.language}>'
 
+
+class PromptLog(db.Model):
+    """
+    PromptLog model representing all prompts sent to OpenAI (for monitoring/debugging).
+    Stores all prompts and responses, regardless of whether they were saved to a project.
+    
+    Attributes:
+        id: Primary key, unique identifier for each log entry
+        user_id: Foreign key to the user who made the request (nullable for anonymous users)
+        operation_type: Type of operation ('generate' or 'explain')
+        language: Programming language (python, javascript, html)
+        input_text: The original input (description or code)
+        full_prompt: The complete prompt sent to OpenAI
+        response_text: The full response from OpenAI
+        output_code: The generated code (if operation was 'generate')
+        explanation: Explanation of the code
+        success: Whether the operation was successful
+        error_message: Error message if operation failed
+        tokens_used: Number of tokens used (if available)
+        model_used: OpenAI model used
+        created_at: Timestamp when this prompt was sent
+    """
+    __tablename__ = 'prompt_logs'
+    
+    # Primary key - unique identifier for each log entry
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Foreign key to users table - nullable for anonymous users
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    
+    # Type of operation - either 'generate' (description to code) or 'explain' (code to explanation)
+    operation_type = db.Column(db.String(20), nullable=False, index=True)
+    
+    # Programming language - can be 'python', 'javascript', or 'html'
+    language = db.Column(db.String(20), nullable=False, index=True)
+    
+    # The original input text (either description or code)
+    input_text = db.Column(db.Text, nullable=False)
+    
+    # The complete prompt sent to OpenAI (system + user messages combined)
+    full_prompt = db.Column(db.Text, nullable=True)
+    
+    # The full response text from OpenAI
+    response_text = db.Column(db.Text, nullable=True)
+    
+    # The generated code (only if operation_type is 'generate')
+    output_code = db.Column(db.Text, nullable=True)
+    
+    # Explanation of the code
+    explanation = db.Column(db.Text, nullable=True)
+    
+    # Whether the operation was successful
+    success = db.Column(db.Boolean, default=True, nullable=False, index=True)
+    
+    # Error message if operation failed
+    error_message = db.Column(db.Text, nullable=True)
+    
+    # Number of tokens used (if available from OpenAI response)
+    tokens_used = db.Column(db.Integer, nullable=True)
+    
+    # OpenAI model used
+    model_used = db.Column(db.String(50), nullable=True)
+    
+    # Timestamp when this prompt was sent
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    
+    # Relationship to user (optional)
+    user = db.relationship('User', backref='prompt_logs')
+    
+    def __repr__(self):
+        """String representation of the PromptLog object for debugging."""
+        return f'<PromptLog {self.id} - {self.operation_type} - {self.language}>'
