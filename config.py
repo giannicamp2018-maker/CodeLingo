@@ -28,14 +28,22 @@ class Config:
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # Database configuration
-    # SQLite database will be stored in the instance folder
-    # Use absolute path to avoid issues with relative paths
-    instance_path = basedir / 'instance'
-    # Ensure instance directory exists
-    instance_path.mkdir(exist_ok=True)
-    database_path = instance_path / 'database.db'
-    # Convert Windows path to SQLite format (forward slashes)
-    database_uri = 'sqlite:///' + str(database_path).replace('\\', '/')
+    # Check if we're on Vercel (serverless environment)
+    # Vercel has a read-only filesystem except for /tmp
+    if os.environ.get('VERCEL'):
+        # On Vercel, use /tmp for database (note: data won't persist between invocations)
+        # For production, you should use a proper database service like PostgreSQL
+        database_uri = 'sqlite:////tmp/database.db'
+    else:
+        # Local development: SQLite database in instance folder
+        instance_path = basedir / 'instance'
+        # Ensure instance directory exists
+        instance_path.mkdir(exist_ok=True)
+        database_path = instance_path / 'database.db'
+        # Convert Windows path to SQLite format (forward slashes)
+        database_uri = 'sqlite:///' + str(database_path).replace('\\', '/')
+    
+    # Allow DATABASE_URL environment variable to override
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or database_uri
     
     # Disable SQLAlchemy event system to save resources
