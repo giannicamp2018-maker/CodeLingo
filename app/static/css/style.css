@@ -65,8 +65,14 @@ body {
    ======================================== */
 
 .navbar {
-    background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    /* Glass morphism effect - adapted for dark theme */
+    background: rgba(22, 27, 34, 0.7);
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
     padding: var(--spacing-md) 0;
     position: sticky;
     top: 0;
