@@ -2,6 +2,10 @@
 
 A web application that helps students learn programming by generating code from English descriptions and explaining existing code. Built with Flask (Python backend) and modern web technologies.
 
+## Deployment
+
+**Try it now:** [https://codelingo-rouge.vercel.app/](https://codelingo-rouge.vercel.app/)
+
 ## Features
 
 - **Code Generation**: Enter an English description and get code in Python, JavaScript, or HTML/CSS
