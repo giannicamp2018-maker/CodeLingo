@@ -27,6 +27,10 @@ class Config:
     # In production, this should be a long, random string stored in environment variables
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY') or 'dev-secret-key-change-in-production'
     
+    # Session configuration - make sessions permanent so they persist
+    SESSION_PERMANENT = True
+    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours in seconds
+    
     # Database configuration
     # Check if we're on Vercel (serverless environment)
     # Vercel has a read-only filesystem except for /tmp

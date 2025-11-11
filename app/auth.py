@@ -95,16 +95,28 @@ def register():
             db.session.add(user)
             db.session.commit()
             
-            # Flash success message
-            flash('Registration successful! Please log in.', 'success')
+            # Debug: Log user creation
+            print(f"User '{username}' (ID: {user.id}) registered successfully")
             
-            # Redirect to login page
-            return redirect(url_for('auth.login'))
+            # Automatically log the user in after registration
+            # Store user ID in session to identify logged-in user
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session.permanent = True  # Make session permanent
+            
+            # Flash success message
+            flash(f'Registration successful! Welcome, {username}! You are now logged in.', 'success')
+            
+            # Redirect to home page (user is already logged in)
+            return redirect(url_for('main.index'))
         
         except Exception as e:
             # If there's an error, rollback database transaction
             db.session.rollback()
             flash('An error occurred during registration. Please try again.', 'error')
+            print(f"Registration error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return render_template('register.html')
     
     # GET request - display registration form
@@ -168,8 +180,11 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             
+            # Make session permanent so it persists across browser restarts
+            session.permanent = True
+            
             # Debug: Log successful login
-            print(f"Login successful: User '{username}' (ID: {user.id}) logged in")
+            print(f"Login successful: User '{username}' (ID: {user.id}) logged in, session permanent: {session.permanent}")
             
             # Flash success message
             flash(f'Welcome back, {user.username}!', 'success')
