@@ -141,7 +141,7 @@ def login():
             return render_template('login.html')
         
         # Find user by username
-        # Query with explicit session refresh to ensure we get fresh data
+        # Query for the user with a fresh query
         user = User.query.filter_by(username=username).first()
         
         # Check if user exists
@@ -151,26 +151,37 @@ def login():
             flash('Invalid username or password.', 'error')
             return render_template('login.html')
         
-        # Refresh the user object from database to ensure we have the latest data
-        # This ensures all attributes are properly loaded, especially password_hash
+        # Force a database query to ensure password_hash is loaded
+        # This ensures we have the latest data from the database
+        # Access the attribute to trigger lazy loading if needed
+        _ = user.password_hash
+        
+        # Refresh the object from database to ensure we have the absolute latest data
         try:
             db.session.refresh(user)
-        except Exception:
-            # If refresh fails (e.g., object is detached), re-query the user
-            db.session.expunge(user)
+        except Exception as refresh_error:
+            # If refresh fails (object detached), re-query
+            print(f"Refresh failed, re-querying user: {refresh_error}")
             user = User.query.filter_by(username=username).first()
+            if not user:
+                flash('Invalid username or password.', 'error')
+                return render_template('login.html')
         
         # Debug: Log user found
         print(f"Login attempt: User '{username}' (ID: {user.id}) found")
         
+        # Explicitly access password_hash to ensure it's loaded from database
+        # This forces SQLAlchemy to fetch the attribute if it hasn't been loaded yet
+        password_hash_value = user.password_hash
+        
         # Check if user has a valid password hash
-        if not user.password_hash:
+        if not password_hash_value:
             print(f"Login error: User '{username}' has no password hash")
             flash('Account error: Password not set. Please contact support or reset your password.', 'error')
             return render_template('login.html')
         
-        # Debug: Log password hash status
-        print(f"Login attempt: User '{username}' has password hash: {bool(user.password_hash)}")
+        # Debug: Log password hash status  
+        print(f"Login attempt: User '{username}' has password hash: {bool(password_hash_value)}, length: {len(password_hash_value) if password_hash_value else 0}")
         
         # Check if password is correct
         try:
