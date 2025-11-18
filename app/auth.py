@@ -141,6 +141,7 @@ def login():
             return render_template('login.html')
         
         # Find user by username
+        # Query with explicit session refresh to ensure we get fresh data
         user = User.query.filter_by(username=username).first()
         
         # Check if user exists
@@ -149,6 +150,15 @@ def login():
             print(f"Login attempt: User '{username}' not found")
             flash('Invalid username or password.', 'error')
             return render_template('login.html')
+        
+        # Refresh the user object from database to ensure we have the latest data
+        # This ensures all attributes are properly loaded, especially password_hash
+        try:
+            db.session.refresh(user)
+        except Exception:
+            # If refresh fails (e.g., object is detached), re-query the user
+            db.session.expunge(user)
+            user = User.query.filter_by(username=username).first()
         
         # Debug: Log user found
         print(f"Login attempt: User '{username}' (ID: {user.id}) found")
